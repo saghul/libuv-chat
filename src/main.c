@@ -125,12 +125,11 @@ static void on_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
     QUEUE_REMOVE(&user->queue);
     uv_close((uv_handle_t*) &user->handle, on_close);
     broadcast(NULL, "* %s fled!\n", user->id);
-    return;
-  }
-
-  if (nread > 0) {
+  } else if (nread > 0) {
     // broadcast message
     broadcast(user, "%s said: %.*s", user->id, (int) nread, buf->base);
+  } else {
+    fprintf(stderr, "on_read: %s\n", uv_strerror(nread));
   }
 }
 
