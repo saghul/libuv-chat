@@ -109,11 +109,8 @@ static void on_connection(uv_stream_t* server_handle, int status)
 
 static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
-  // Return a buffer that wraps a static buffer.
-  // Safe because our on_read() allocations never overlap on Unix
-  static char slab[512];
-  buf->base = slab;
-  buf->len = sizeof(slab);
+  buf->base = xmalloc(suggested_size);
+  buf->len = suggested_size;
 }
 
 static void on_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
@@ -131,6 +128,8 @@ static void on_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
   } else {
     fprintf(stderr, "on_read: %s\n", uv_strerror(nread));
   }
+
+  free(buf->base);
 }
 
 static void on_write(uv_write_t *req, int status)
