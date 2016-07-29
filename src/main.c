@@ -33,12 +33,16 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+
 struct user
 {
   QUEUE queue;
   uv_tcp_t handle;
   char id[32];
 };
+
+static QUEUE users;
+
 
 static void *xmalloc(size_t len);
 static void fatal(const char *what, int error);
@@ -52,7 +56,6 @@ static void on_write(uv_write_t *req, int status);
 static void on_close(uv_handle_t* handle);
 static void on_connection(uv_stream_t* server_handle, int status);
 
-static QUEUE users;
 
 int main(void)
 {
@@ -83,6 +86,7 @@ int main(void)
   return 0;
 }
 
+
 static void on_connection(uv_stream_t* server_handle, int status)
 {
   assert(status == 0);
@@ -107,11 +111,13 @@ static void on_connection(uv_stream_t* server_handle, int status)
   uv_read_start((uv_stream_t*) &user->handle, on_alloc, on_read);
 }
 
+
 static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
   buf->base = xmalloc(suggested_size);
   buf->len = suggested_size;
 }
+
 
 static void on_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
 {
@@ -132,10 +138,12 @@ static void on_read(uv_stream_t* handle, ssize_t nread, const uv_buf_t* buf)
   free(buf->base);
 }
 
+
 static void on_write(uv_write_t *req, int status)
 {
   free(req);
 }
+
 
 static void on_close(uv_handle_t* handle)
 {
@@ -143,11 +151,13 @@ static void on_close(uv_handle_t* handle)
   free(user);
 }
 
+
 static void fatal(const char *what, int error)
 {
   fprintf(stderr, "%s: %s\n", what, uv_strerror(error));
   exit(1);
 }
+
 
 static void broadcast(const struct user* sender, const char *fmt, ...)
 {
@@ -167,6 +177,7 @@ static void broadcast(const struct user* sender, const char *fmt, ...)
   }
 }
 
+
 static void unicast(struct user *user, const char *msg)
 {
   size_t len = strlen(msg);
@@ -177,10 +188,12 @@ static void unicast(struct user *user, const char *msg)
   uv_write(req, (uv_stream_t*) &user->handle, &buf, 1, on_write);
 }
 
+
 static void make_user_id(struct user *user)
 {
   snprintf(user->id, sizeof(user->id), "%s", pokemon_names[rand() % ARRAY_SIZE(pokemon_names)]);
 }
+
 
 static const char *addr_and_port(struct user *user)
 {
@@ -199,6 +212,7 @@ static const char *addr_and_port(struct user *user)
 
   return buf;
 }
+
 
 static void *xmalloc(size_t len)
 {
