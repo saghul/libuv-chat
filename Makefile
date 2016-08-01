@@ -13,3 +13,10 @@ out/Makefile: deps/libuv build/gyp
 build: out/Makefile
 	$(MAKE) -C out
 
+clean:
+	rm -rf out
+
+distclean:
+	rm -rf build deps out
+
+.PHONY: clean distclean
